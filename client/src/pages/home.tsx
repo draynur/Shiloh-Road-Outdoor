@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Link } from "wouter";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
   Bookmark,
@@ -9,6 +9,8 @@ import {
   MapPinned,
   Search,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +23,11 @@ import heroRidgeRoad from "@/assets/images/hero-ridge-road.png";
 import imgCampCoffee from "@/assets/images/feature-camp-coffee.png";
 import imgMossyTrail from "@/assets/images/feature-mossy-trail.png";
 import imgRiverBend from "@/assets/images/feature-river-bend.png";
+
+// New slider assets
+import sliderLake from "@/assets/images/slider-lake.png";
+import sliderForest from "@/assets/images/slider-forest.png";
+import sliderStars from "@/assets/images/slider-stars.png";
 
 type Author = {
   id: string;
@@ -131,6 +138,30 @@ const STORIES: Story[] = [
   },
 ];
 
+const SLIDES = [
+  {
+    id: 1,
+    image: sliderLake,
+    title: "Mornings on the Blue Ridge",
+    subtitle: "Where the fog meets the forest and the day begins slowly.",
+    kicker: "FIELD NOTE 08",
+  },
+  {
+    id: 2,
+    image: sliderForest,
+    title: "The Discipline of the Trail",
+    subtitle: "Finding rhythm in the repetition of every single mile.",
+    kicker: "GUIDE 12",
+  },
+  {
+    id: 3,
+    image: sliderStars,
+    title: "Nights Under the Cherokee Sky",
+    subtitle: "A fire, a map, and a silence that feels like home.",
+    kicker: "DISPATCH 04",
+  },
+];
+
 function formatShortDate(iso: string) {
   const d = new Date(iso);
   return d.toLocaleDateString(undefined, {
@@ -153,6 +184,14 @@ function cn(...classes: Array<string | false | null | undefined>) {
 export default function HomePage() {
   const [query, setQuery] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, []);
 
   const featured = useMemo(() => STORIES.filter((s) => s.featured), []);
 
@@ -265,176 +304,171 @@ export default function HomePage() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-4 pb-16 pt-6">
-        <section
-          className="sr-grain relative overflow-hidden rounded-[28px] border bg-card shadow-[var(--shadow-lg)]"
-          data-testid="section-hero"
-        >
-          <div className="absolute inset-0">
+      <section className="relative h-[85vh] w-full overflow-hidden" data-testid="section-hero-slider">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentSlide}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2, ease: "easeInOut" }}
+            className="absolute inset-0"
+          >
             <img
-              src={heroRidgeRoad}
-              alt="Foggy ridge road at dawn"
+              src={SLIDES[currentSlide].image}
+              alt={SLIDES[currentSlide].title}
               className="h-full w-full object-cover"
-              data-testid="img-hero"
+              data-testid={`img-slide-${currentSlide}`}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/55 to-background/5" />
-          </div>
-
-          <div className="relative grid gap-6 px-6 py-10 md:grid-cols-[1.3fr_.9fr] md:gap-10 md:px-10 md:py-14">
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div className="inline-flex items-center gap-2 rounded-full border bg-background/70 px-3 py-1 text-sm shadow-[var(--shadow-xs)]">
-                <Compass className="h-4 w-4 text-foreground/80" aria-hidden="true" />
-                <span className="text-foreground/80" data-testid="text-hero-kicker">
-                  Recent stories by prominent authors
-                </span>
-              </div>
-
-              <h1
-                className="mt-4 font-serif text-4xl font-semibold leading-[1.02] tracking-tight text-foreground md:text-6xl"
-                data-testid="text-hero-title"
-              >
-                A field journal for quiet roads and wild mornings.
-              </h1>
-
-              <p
-                className="mt-4 max-w-xl text-base leading-relaxed text-foreground/75 md:text-lg"
-                data-testid="text-hero-subtitle"
-              >
-                Shiloh Rd Outdoor highlights the best new writing across hikes, camps, rivers, and
-                small towns — with photos, routes, and notes you can steal for your next weekend.
-              </p>
-
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <div className="relative w-full sm:max-w-sm">
-                  <Search
-                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                    aria-hidden="true"
-                  />
-                  <Input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search stories, authors, locations…"
-                    className="h-11 rounded-full pl-10"
-                    data-testid="input-search"
-                  />
-                </div>
-                <Button
-                  variant="secondary"
-                  className="h-11 rounded-full"
-                  data-testid="button-clear-filters"
-                  onClick={() => {
-                    setQuery("");
-                    setActiveTag(null);
-                  }}
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/20" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="mx-auto w-full max-w-6xl px-4 text-center">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.8 }}
                 >
-                  Clear
-                </Button>
-              </div>
-
-              <div className="mt-5 flex flex-wrap items-center gap-2" data-testid="list-tags">
-                <Badge
-                  className={cn(
-                    "cursor-pointer rounded-full border bg-background/70 px-3 py-1 text-foreground/80 hover:bg-background",
-                    !activeTag && "bg-foreground text-background hover:bg-foreground",
-                  )}
-                  data-testid="badge-tag-all"
-                  onClick={() => setActiveTag(null)}
-                >
-                  All
-                </Badge>
-                {allTags.slice(0, 6).map((t) => (
-                  <Badge
-                    key={t}
-                    className={cn(
-                      "cursor-pointer rounded-full border bg-background/70 px-3 py-1 text-foreground/80 hover:bg-background",
-                      activeTag === t && "bg-foreground text-background hover:bg-foreground",
-                    )}
-                    data-testid={`badge-tag-${t.replace(/\s+/g, "-").toLowerCase()}`}
-                    onClick={() => setActiveTag(activeTag === t ? null : t)}
-                  >
-                    {t}
+                  <Badge variant="outline" className="mb-6 rounded-full border-white/30 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-[0.2em] text-white uppercase backdrop-blur-sm">
+                    {SLIDES[currentSlide].kicker}
                   </Badge>
-                ))}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
-              className="relative"
-            >
-              <div className="rounded-[22px] border bg-background/70 p-4 shadow-[var(--shadow-sm)]">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div
-                      className="text-xs uppercase tracking-wide text-muted-foreground"
-                      data-testid="text-featured-label"
-                    >
-                      Featured
-                    </div>
-                    <div className="mt-1 font-serif text-xl font-semibold" data-testid="text-featured-title">
-                      {featured[0]?.title}
-                    </div>
-                    <div className="mt-2 text-sm leading-relaxed text-foreground/70" data-testid="text-featured-excerpt">
-                      {featured[0]?.excerpt}
-                    </div>
-                  </div>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="shrink-0 rounded-full"
-                    data-testid="button-bookmark-featured"
-                    onClick={() => {
-                      // mock interaction
-                    }}
-                  >
-                    <Bookmark className="h-4 w-4" aria-hidden="true" />
-                  </Button>
-                </div>
-
-                <Separator className="my-4" />
-
-                <div className="grid gap-3">
-                  {featured.slice(1, 2).map((s) => {
-                    const a = AUTHORS.find((x) => x.id === s.authorId);
-                    return (
-                      <div
-                        key={s.id}
-                        className="flex items-center justify-between gap-3 rounded-[16px] border bg-card p-3 hover-elevate"
-                        data-testid={`row-featured-${s.id}`}
+                  <h1 className="font-serif text-5xl font-semibold leading-tight text-white md:text-8xl">
+                    {SLIDES[currentSlide].title.split(" ").map((word, i) => (
+                      <motion.span
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 + i * 0.1, duration: 0.8 }}
+                        className="inline-block mr-[0.25em]"
                       >
-                        <div className="min-w-0">
-                          <div className="truncate font-medium" data-testid={`text-featured-title-${s.id}`}>
-                            {s.title}
-                          </div>
-                          <div className="mt-0.5 text-xs text-muted-foreground" data-testid={`text-featured-meta-${s.id}`}>
-                            {a?.name} · {s.location}
-                          </div>
-                        </div>
-                        <Button
-                          size="icon"
-                          className="rounded-full"
-                          data-testid={`button-open-featured-${s.id}`}
-                          onClick={() => {
-                            const el = document.getElementById("stories");
-                            el?.scrollIntoView({ behavior: "smooth" });
-                          }}
-                        >
-                          <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                        </Button>
-                      </div>
-                    );
-                  })}
-                </div>
+                        {word}
+                      </motion.span>
+                    ))}
+                  </h1>
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1, duration: 1 }}
+                    className="mt-6 text-lg text-white/80 md:text-2xl"
+                  >
+                    {SLIDES[currentSlide].subtitle}
+                  </motion.p>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.2, duration: 0.8 }}
+                    className="mt-10 flex justify-center gap-4"
+                  >
+                    <Button size="lg" className="h-14 rounded-full px-8 text-lg" onClick={() => {
+                        const el = document.getElementById("stories");
+                        el?.scrollIntoView({ behavior: "smooth" });
+                      }}>
+                      Explore Stories
+                    </Button>
+                    <Button size="lg" variant="outline" className="h-14 rounded-full border-white/30 bg-white/10 px-8 text-lg text-white hover:bg-white/20 backdrop-blur-sm">
+                      Field Notes
+                    </Button>
+                  </motion.div>
+                </motion.div>
               </div>
-            </motion.div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        <div className="absolute bottom-10 left-1/2 flex -translate-x-1/2 items-center gap-4 z-20">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full text-white/50 hover:bg-white/10 hover:text-white"
+            onClick={() => setCurrentSlide((prev) => (prev - 1 + SLIDES.length) % SLIDES.length)}
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
+          <div className="flex gap-2">
+            {SLIDES.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentSlide(i)}
+                className={cn(
+                  "h-1.5 transition-all duration-500 rounded-full",
+                  currentSlide === i ? "w-10 bg-white" : "w-2 bg-white/30"
+                )}
+              />
+            ))}
           </div>
-        </section>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full text-white/50 hover:bg-white/10 hover:text-white"
+            onClick={() => setCurrentSlide((prev) => (prev + 1) % SLIDES.length)}
+          >
+            <ChevronRight className="h-6 w-6" />
+          </Button>
+        </div>
+      </section>
+
+      <main className="mx-auto w-full max-w-6xl px-4 pb-16 pt-12">
+        <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="max-w-xl">
+            <h2 className="font-serif text-3xl font-semibold tracking-tight" data-testid="text-search-title">
+              Search the field journal
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              Filter through hikes, camps, rivers, and practical field notes from across the ridgeline.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center flex-1 md:max-w-md">
+            <div className="relative w-full">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search stories, authors, locations…"
+                className="h-11 rounded-full pl-10 bg-card border-border/50"
+                data-testid="input-search"
+              />
+            </div>
+            <Button
+              variant="secondary"
+              className="h-11 rounded-full px-6"
+              data-testid="button-clear-filters"
+              onClick={() => {
+                setQuery("");
+                setActiveTag(null);
+              }}
+            >
+              Clear
+            </Button>
+          </div>
+        </div>
+
+        <div className="mb-12 flex flex-wrap items-center gap-2" data-testid="list-tags">
+          <Badge
+            className={cn(
+              "cursor-pointer rounded-full border px-4 py-2 text-sm transition-all duration-300",
+              !activeTag ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground/70 hover:bg-background border-border/50 shadow-sm",
+            )}
+            data-testid="badge-tag-all"
+            onClick={() => setActiveTag(null)}
+          >
+            All Dispatch
+          </Badge>
+          {allTags.map((t) => (
+            <Badge
+              key={t}
+              className={cn(
+                "cursor-pointer rounded-full border px-4 py-2 text-sm transition-all duration-300",
+                activeTag === t ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground/70 hover:bg-background border-border/50 shadow-sm",
+              )}
+              data-testid={`badge-tag-${t.replace(/\s+/g, "-").toLowerCase()}`}
+              onClick={() => setActiveTag(activeTag === t ? null : t)}
+            >
+              {t}
+            </Badge>
+          ))}
+        </div>
 
         <section className="mt-10" id="stories" data-testid="section-stories">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -451,103 +485,64 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="mt-5 grid gap-4 md:grid-cols-2" data-testid="grid-stories">
+          <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3" data-testid="grid-stories">
             {results.map((s) => {
               const a = AUTHORS.find((x) => x.id === s.authorId);
               return (
                 <Card
                   key={s.id}
-                  className="sr-grain group overflow-hidden rounded-[22px] border bg-card shadow-[var(--shadow-sm)] transition-transform duration-300 hover:-translate-y-0.5"
+                  className="sr-grain group flex flex-col overflow-hidden rounded-[24px] border border-border/50 bg-card shadow-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-xl"
                   data-testid={`card-story-${s.id}`}
                 >
-                  <div className="grid md:grid-cols-[180px_1fr]">
-                    <div className="relative h-44 w-full md:h-full">
-                      <img
-                        src={imageFor(s.imageKey)}
-                        alt="Story feature"
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                        data-testid={`img-story-${s.id}`}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
-                      {s.featured ? (
-                        <div className="absolute left-3 top-3">
-                          <Badge className="rounded-full" data-testid={`badge-featured-${s.id}`}>
-                            Featured
-                          </Badge>
-                        </div>
-                      ) : null}
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <img
+                      src={imageFor(s.imageKey)}
+                      alt="Story feature"
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      data-testid={`img-story-${s.id}`}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                    {s.featured ? (
+                      <div className="absolute left-4 top-4">
+                        <Badge className="rounded-full bg-primary/90 backdrop-blur-md px-3 py-1" data-testid={`badge-featured-${s.id}`}>
+                          Featured
+                        </Badge>
+                      </div>
+                    ) : null}
+                    <div className="absolute right-4 bottom-4 translate-y-12 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+                      <Button size="icon" className="rounded-full h-10 w-10 shadow-lg">
+                        <ArrowRight className="h-5 w-5" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-1 flex-col p-6">
+                    <div className="flex items-center justify-between text-xs font-medium text-muted-foreground/80 uppercase tracking-widest mb-4">
+                      <span>{formatShortDate(s.dateISO)}</span>
+                      <span>{s.readTimeMinutes} min read</span>
                     </div>
 
-                    <div className="p-5">
-                      <div
-                        className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
-                        data-testid={`text-story-meta-${s.id}`}
-                      >
-                        <span>{formatShortDate(s.dateISO)}</span>
-                        <span aria-hidden="true">·</span>
-                        <span>{s.readTimeMinutes} min</span>
-                        <span aria-hidden="true">·</span>
-                        <span className="inline-flex items-center gap-1">
-                          <MapPinned className="h-3.5 w-3.5" aria-hidden="true" />
-                          <span data-testid={`text-story-location-${s.id}`}>{s.location}</span>
-                        </span>
-                      </div>
+                    <h3 className="font-serif text-2xl font-semibold leading-tight group-hover:text-primary transition-colors duration-300" data-testid={`text-story-title-${s.id}`}>
+                      {s.title}
+                    </h3>
 
-                      <div
-                        className="mt-2 font-serif text-xl font-semibold leading-snug"
-                        data-testid={`text-story-title-${s.id}`}
-                      >
-                        {s.title}
-                      </div>
+                    <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-foreground/70" data-testid={`text-story-excerpt-${s.id}`}>
+                      {s.excerpt}
+                    </p>
 
-                      <p
-                        className="mt-2 line-clamp-3 text-sm leading-relaxed text-foreground/70"
-                        data-testid={`text-story-excerpt-${s.id}`}
-                      >
-                        {s.excerpt}
-                      </p>
-
-                      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                        <div className="flex flex-wrap gap-2" data-testid={`list-story-tags-${s.id}`}>
-                          {s.tags.slice(0, 3).map((t) => (
-                            <Badge
-                              key={t}
-                              variant="secondary"
-                              className="rounded-full bg-secondary/70"
-                              data-testid={`badge-story-${s.id}-${t.replace(/\s+/g, "-").toLowerCase()}`}
-                            >
-                              {t}
-                            </Badge>
-                          ))}
-                        </div>
-                        <div className="text-sm text-muted-foreground" data-testid={`text-story-author-${s.id}`}>
-                          {a?.name}
-                        </div>
-                      </div>
-
-                      <div className="mt-4 flex items-center gap-2">
-                        <Button
-                          className="rounded-full"
-                          data-testid={`button-read-${s.id}`}
-                          onClick={() => {
-                            // mock interaction
-                          }}
-                        >
-                          Read story
-                          <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="rounded-full"
-                          data-testid={`button-bookmark-${s.id}`}
-                          onClick={() => {
-                            // mock interaction
-                          }}
-                        >
-                          <Bookmark className="h-4 w-4" aria-hidden="true" />
-                        </Button>
-                      </div>
+                    <div className="mt-auto pt-6 flex items-center justify-between gap-4 border-t border-border/30">
+                       <div className="flex items-center gap-2">
+                         <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center font-bold text-[10px] text-primary">
+                           {a?.name.split(' ').map(n => n[0]).join('')}
+                         </div>
+                         <div className="text-sm font-medium" data-testid={`text-story-author-${s.id}`}>
+                           {a?.name}
+                         </div>
+                       </div>
+                       <div className="flex items-center gap-1 text-xs text-muted-foreground font-medium uppercase tracking-tighter">
+                          <MapPinned className="h-3 w-3" />
+                          <span>{s.location}</span>
+                       </div>
                     </div>
                   </div>
                 </Card>
@@ -556,56 +551,40 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="mt-12" id="authors" data-testid="section-authors">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <h2 className="font-serif text-3xl font-semibold tracking-tight" data-testid="text-authors-title">
-                Prominent authors
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground" data-testid="text-authors-subtitle">
-                Writers and photographers shaping the Shiloh Rd voice.
-              </p>
-            </div>
+        <section className="mt-20" id="authors" data-testid="section-authors">
+          <div className="text-center mb-12">
+            <h2 className="font-serif text-4xl font-semibold tracking-tight" data-testid="text-authors-title">
+              Prominent authors
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              Writers and photographers shaping the Shiloh Rd voice.
+            </p>
           </div>
 
-          <div className="mt-5 grid gap-4 md:grid-cols-3" data-testid="grid-authors">
+          <div className="grid gap-6 md:grid-cols-3" data-testid="grid-authors">
             {AUTHORS.map((a) => (
               <Card
                 key={a.id}
-                className="sr-grain rounded-[22px] border bg-card p-5 shadow-[var(--shadow-sm)]"
+                className="sr-grain rounded-[28px] border border-border/50 bg-card p-8 shadow-sm transition-all duration-300 hover:shadow-md group"
                 data-testid={`card-author-${a.id}`}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="font-serif text-xl font-semibold" data-testid={`text-author-name-${a.id}`}>
-                      {a.name}
-                    </div>
-                    <div className="mt-1 text-sm text-muted-foreground" data-testid={`text-author-role-${a.id}`}>
-                      {a.role}
-                    </div>
+                <div className="flex flex-col items-center text-center">
+                  <div className="mb-6 h-20 w-20 rounded-full bg-secondary/80 flex items-center justify-center border-4 border-background shadow-xl group-hover:scale-110 transition-transform duration-500">
+                    <Leaf className="h-8 w-8 text-primary" aria-hidden="true" />
                   </div>
-                  <div className="rounded-full border bg-secondary/60 p-2" data-testid={`icon-author-${a.id}`}>
-                    <Leaf className="h-4 w-4 text-foreground/70" aria-hidden="true" />
+                  <h3 className="font-serif text-2xl font-semibold mb-1" data-testid={`text-author-name-${a.id}`}>
+                    {a.name}
+                  </h3>
+                  <div className="text-sm font-medium text-primary uppercase tracking-[0.2em] mb-4" data-testid={`text-author-role-${a.id}`}>
+                    {a.role}
                   </div>
-                </div>
-
-                <Separator className="my-4" />
-
-                <div className="text-sm leading-relaxed text-foreground/75" data-testid={`text-author-specialty-${a.id}`}>
-                  {a.specialty}
-                </div>
-
-                <div className="mt-4 flex items-center justify-between gap-3">
-                  <Badge
-                    variant="secondary"
-                    className="rounded-full bg-secondary/70"
-                    data-testid={`badge-author-${a.id}`}
-                  >
-                    contributor
-                  </Badge>
+                  <Separator className="w-12 mb-4 bg-primary/20" />
+                  <p className="text-sm leading-relaxed text-muted-foreground italic px-4" data-testid={`text-author-specialty-${a.id}`}>
+                    "{a.specialty}"
+                  </p>
                   <Button
                     variant="ghost"
-                    className="rounded-full"
+                    className="mt-6 rounded-full group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300"
                     data-testid={`button-view-author-${a.id}`}
                     onClick={() => {
                       setQuery(a.name);
@@ -613,7 +592,7 @@ export default function HomePage() {
                       el?.scrollIntoView({ behavior: "smooth" });
                     }}
                   >
-                    View stories
+                    View Stories
                     <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                   </Button>
                 </div>
@@ -622,208 +601,144 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="mt-12" id="highlights" data-testid="section-highlights">
-          <div>
-            <h2 className="font-serif text-3xl font-semibold tracking-tight" data-testid="text-highlights-title">
-              Highlights
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground" data-testid="text-highlights-subtitle">
-              A few quick picks to plan your next loop.
-            </p>
+        <section className="mt-20" id="highlights" data-testid="section-highlights">
+          <div className="grid md:grid-cols-2 gap-12 items-center mb-12">
+             <div className="order-2 md:order-1">
+                <h2 className="font-serif text-4xl font-semibold tracking-tight mb-4" data-testid="text-highlights-title">
+                  Highlights
+                </h2>
+                <p className="text-lg text-muted-foreground leading-relaxed">
+                  Every season brings a new perspective to the ridgeline. These are the curated guides and field notes helping our community explore more intentionally.
+                </p>
+             </div>
+             <div className="grid grid-cols-2 gap-4 order-1 md:order-2">
+                <div className="aspect-square rounded-[32px] overflow-hidden border-8 border-background shadow-2xl -rotate-6 transition-transform duration-500 hover:rotate-0">
+                   <img src={imgMossyTrail} className="h-full w-full object-cover" alt="Trail" />
+                </div>
+                <div className="aspect-square rounded-[32px] overflow-hidden border-8 border-background shadow-2xl rotate-6 transition-transform duration-500 hover:rotate-0 mt-8">
+                   <img src={imgCampCoffee} className="h-full w-full object-cover" alt="Camp" />
+                </div>
+             </div>
           </div>
 
-          <div className="mt-5 grid gap-4 md:grid-cols-3" data-testid="grid-highlights">
+          <div className="grid gap-6 md:grid-cols-3" data-testid="grid-highlights">
             {[
               {
                 id: "h1",
                 title: "Weekend Loop",
                 desc: "A simple two-day route with one big view and an easy camp.",
                 icon: Compass,
+                color: "bg-blue-500/10 text-blue-500"
               },
               {
                 id: "h2",
                 title: "Gear Notes",
                 desc: "What we’re actually carrying right now — updated monthly.",
                 icon: Leaf,
+                color: "bg-green-500/10 text-green-500"
               },
               {
                 id: "h3",
                 title: "Photo Studies",
                 desc: "Light, weather, and composition — field lessons from the road.",
                 icon: Sparkles,
+                color: "bg-orange-500/10 text-orange-500"
               },
             ].map((h) => (
               <Card
                 key={h.id}
-                className="sr-grain rounded-[22px] border bg-card p-5 shadow-[var(--shadow-sm)]"
+                className="sr-grain rounded-[28px] border border-border/50 bg-card p-8 shadow-sm transition-all duration-300 hover:shadow-md"
                 data-testid={`card-highlight-${h.id}`}
               >
-                <div className="flex items-start gap-3">
-                  <div
-                    className="rounded-[14px] border bg-secondary/70 p-3"
-                    data-testid={`icon-highlight-${h.id}`}
-                  >
-                    <h.icon className="h-5 w-5 text-foreground/70" aria-hidden="true" />
+                <div className="flex flex-col gap-6">
+                  <div className={cn("rounded-2xl p-4 w-fit", h.color)} data-testid={`icon-highlight-${h.id}`}>
+                    <h.icon className="h-6 w-6" aria-hidden="true" />
                   </div>
                   <div>
-                    <div className="font-serif text-xl font-semibold" data-testid={`text-highlight-title-${h.id}`}>
+                    <h3 className="font-serif text-2xl font-semibold mb-2" data-testid={`text-highlight-title-${h.id}`}>
                       {h.title}
-                    </div>
-                    <div className="mt-1 text-sm leading-relaxed text-foreground/70" data-testid={`text-highlight-desc-${h.id}`}>
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed" data-testid={`text-highlight-desc-${h.id}`}>
                       {h.desc}
-                    </div>
+                    </p>
                   </div>
+                  <Button variant="link" className="p-0 h-auto w-fit text-primary font-bold tracking-widest uppercase text-xs">
+                    Learn More <ArrowRight className="ml-2 h-3 w-3" />
+                  </Button>
                 </div>
               </Card>
             ))}
           </div>
         </section>
 
-        <section className="mt-12" id="subscribe" data-testid="section-subscribe">
-          <div className="sr-grain overflow-hidden rounded-[26px] border bg-card shadow-[var(--shadow-md)]">
-            <div className="grid gap-0 md:grid-cols-[1.2fr_.8fr]">
-              <div className="p-7 md:p-10">
-                <div className="inline-flex items-center gap-2 rounded-full border bg-secondary/60 px-3 py-1 text-xs uppercase tracking-wide text-foreground/70">
-                  <Sparkles className="h-4 w-4" aria-hidden="true" />
-                  Field dispatch
-                </div>
-                <h3
-                  className="mt-4 font-serif text-3xl font-semibold leading-tight"
-                  data-testid="text-subscribe-title"
-                >
+        <section className="mt-20" id="subscribe" data-testid="section-subscribe">
+          <div className="sr-grain relative overflow-hidden rounded-[40px] border border-border/50 bg-primary p-8 md:p-16 shadow-2xl">
+            <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-white/10 to-transparent pointer-events-none" />
+            <div className="relative z-10 max-w-2xl">
+                <Badge className="rounded-full bg-white/20 text-white border-transparent backdrop-blur-md mb-6 px-4 py-1.5 uppercase tracking-widest text-xs">
+                  Field Dispatch
+                </Badge>
+                <h3 className="font-serif text-4xl md:text-6xl font-semibold text-white leading-tight mb-6" data-testid="text-subscribe-title">
                   Get one great story a week.
                 </h3>
-                <p
-                  className="mt-2 text-sm leading-relaxed text-foreground/70"
-                  data-testid="text-subscribe-subtitle"
-                >
-                  New essays, routes, and photo notes — delivered when they’re worth your time.
+                <p className="text-white/80 text-lg md:text-xl leading-relaxed mb-10" data-testid="text-subscribe-subtitle">
+                  New essays, routes, and photo notes from the ridgeline. No noise, just the good stuff delivered when it's worth your time.
                 </p>
 
-                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                <div className="flex flex-col gap-4 sm:flex-row max-w-lg">
                   <Input
                     placeholder="Email address"
-                    className="h-11 rounded-full"
+                    className="h-14 rounded-full bg-white/10 border-white/20 text-white placeholder:text-white/50 px-6 text-lg"
                     data-testid="input-email"
                   />
-                  <Button className="h-11 rounded-full" data-testid="button-join">
-                    Join
-                    <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                  <Button className="h-14 rounded-full px-10 text-lg bg-white text-primary hover:bg-white/90" data-testid="button-join">
+                    Join Dispatch
                   </Button>
                 </div>
-
-                <p className="mt-3 text-xs text-muted-foreground" data-testid="text-subscribe-fineprint">
-                  No spam. Just the good stuff.
+                <p className="mt-6 text-white/50 text-sm" data-testid="text-subscribe-fineprint">
+                  Join 12,000+ outdoor enthusiasts. Unsubscribe anytime.
                 </p>
-              </div>
-
-              <div className="relative min-h-[220px]">
-                <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--primary)/0.20)] via-transparent to-[hsl(var(--accent)/0.22)]" />
-                <div className="absolute inset-0 p-7 md:p-10">
-                  <div className="rounded-[22px] border bg-background/70 p-5 shadow-[var(--shadow-sm)]">
-                    <div className="text-xs uppercase tracking-wide text-muted-foreground" data-testid="text-spotlight-label">
-                      Spotlight
-                    </div>
-                    <div className="mt-1 font-serif text-xl font-semibold" data-testid="text-spotlight-title">
-                      Editor’s picks
-                    </div>
-                    <div className="mt-3 space-y-3" data-testid="list-spotlight">
-                      {STORIES.slice(0, 3).map((s) => (
-                        <div
-                          key={s.id}
-                          className="flex items-center justify-between gap-3 rounded-[16px] border bg-card p-3 hover-elevate"
-                          data-testid={`row-spotlight-${s.id}`}
-                        >
-                          <div className="min-w-0">
-                            <div className="truncate text-sm font-medium" data-testid={`text-spotlight-story-${s.id}`}>
-                              {s.title}
-                            </div>
-                            <div className="mt-0.5 text-xs text-muted-foreground" data-testid={`text-spotlight-meta-${s.id}`}>
-                              {formatShortDate(s.dateISO)} · {s.readTimeMinutes} min
-                            </div>
-                          </div>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            className="rounded-full"
-                            data-testid={`button-spotlight-${s.id}`}
-                            onClick={() => {
-                              const el = document.getElementById("stories");
-                              el?.scrollIntoView({ behavior: "smooth" });
-                            }}
-                          >
-                            <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between rounded-[22px] border bg-background/70 px-4 py-3 text-sm shadow-[var(--shadow-xs)]">
-                    <div className="inline-flex items-center gap-2 text-foreground/75" data-testid="text-footer-note">
-                      <Compass className="h-4 w-4" aria-hidden="true" />
-                      Built for slow travel.
-                    </div>
-                    <Button
-                      variant="ghost"
-                      className="rounded-full"
-                      data-testid="button-back-top"
-                      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                    >
-                      Back to top
-                    </Button>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </section>
 
-        <footer className="mt-10 border-t pt-8" data-testid="footer-site">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <div className="font-serif text-lg font-semibold" data-testid="text-footer-brand">
+        <footer className="mt-20 border-t border-border/30 pt-12" data-testid="footer-site">
+          <div className="flex flex-col gap-12 sm:flex-row sm:justify-between mb-12">
+            <div className="max-w-xs">
+              <div className="font-serif text-2xl font-semibold mb-4" data-testid="text-footer-brand">
                 Shiloh Rd Outdoor
               </div>
-              <div className="mt-1 text-sm text-muted-foreground" data-testid="text-footer-copy">
-                © {new Date().getFullYear()} — Trails, campfires, and field notes.
-              </div>
+              <p className="text-muted-foreground leading-relaxed">
+                A field journal dedicated to the quiet roads, wild mornings, and the stories that happen in between.
+              </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2" data-testid="list-footer-links">
-              <Button
-                variant="outline"
-                className="rounded-full"
-                data-testid="button-footer-about"
-                onClick={() => {
-                  const el = document.getElementById("authors");
-                  el?.scrollIntoView({ behavior: "smooth" });
-                }}
-              >
-                About
-              </Button>
-              <Button
-                variant="outline"
-                className="rounded-full"
-                data-testid="button-footer-contact"
-                onClick={() => {
-                  const el = document.getElementById("subscribe");
-                  el?.scrollIntoView({ behavior: "smooth" });
-                }}
-              >
-                Contact
-              </Button>
-              <Button
-                className="rounded-full"
-                data-testid="button-footer-explore"
-                onClick={() => {
-                  const el = document.getElementById("stories");
-                  el?.scrollIntoView({ behavior: "smooth" });
-                }}
-              >
-                Explore
-                <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
-              </Button>
+            <div className="grid grid-cols-2 gap-12">
+               <div className="flex flex-col gap-4">
+                  <span className="font-bold text-xs uppercase tracking-widest text-foreground/50">Journal</span>
+                  <Link href="#stories" className="text-sm hover:text-primary transition-colors">Stories</Link>
+                  <Link href="#authors" className="text-sm hover:text-primary transition-colors">Authors</Link>
+                  <Link href="#highlights" className="text-sm hover:text-primary transition-colors">Highlights</Link>
+               </div>
+               <div className="flex flex-col gap-4">
+                  <span className="font-bold text-xs uppercase tracking-widest text-foreground/50">Connect</span>
+                  <Link href="#subscribe" className="text-sm hover:text-primary transition-colors">Dispatch</Link>
+                  <a href="#" className="text-sm hover:text-primary transition-colors">Instagram</a>
+                  <a href="#" className="text-sm hover:text-primary transition-colors">Contact</a>
+               </div>
             </div>
+          </div>
+          <div className="flex flex-col gap-6 pt-8 border-t border-border/10 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-xs text-muted-foreground" data-testid="text-footer-copy">
+              © {new Date().getFullYear()} Shiloh Rd Outdoor · All Rights Reserved · Built for slow travel.
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-full text-xs font-bold uppercase tracking-widest hover:bg-primary/10 hover:text-primary transition-all"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            >
+              Back to top
+            </Button>
           </div>
         </footer>
       </main>
