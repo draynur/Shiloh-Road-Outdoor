@@ -7,6 +7,11 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// If Local JSON is active, skip programmatic registration.
+if ( is_dir( SRO_THEME_DIR . '/acf-json' ) ) {
+	return;
+}
+
 add_action( 'acf/include_fields', function () {
 
 	/*
