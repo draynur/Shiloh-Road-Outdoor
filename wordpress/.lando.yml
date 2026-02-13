@@ -1,0 +1,5 @@
+name: shiloh-rd-outdoor
+recipe: wordpress
+config:
+  webroot: .
+  php: '8.2'

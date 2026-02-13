@@ -1,0 +1,12 @@
+{
+  "name": "shiloh-rd-outdoor",
+  "private": true,
+  "scripts": {
+    "dev": "npx @tailwindcss/cli -i ./assets/src/css/main.css -o ./assets/dist/css/main.css --watch",
+    "build": "npx @tailwindcss/cli -i ./assets/src/css/main.css -o ./assets/dist/css/main.css --minify"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.0.0",
+    "tailwindcss": "^4.0.0"
+  }
+}

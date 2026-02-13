@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(npm run build:*)",
+      "Bash(lando wp option get:*)",
+      "Bash(lando wp plugin activate:*)",
+      "Bash(lando wp theme activate:*)",
+      "Bash(lando rebuild:*)",
+      "Bash(lando wp post create:*)",
+      "Bash(for tag in \"Ridge Roads\" \"Winter Light\" \"Navigation\" \"Camp\" \"Ritual\" \"Gear\" \"Rivers\" \"Reflection\" \"Slow Travel\" \"Hiking\" \"Technique\" \"Wet Weather\" \"Packing\" \"Minimal\" \"Field Notes\")",
+      "Bash(do lando wp term create:*)",
+      "Bash(done)",
+      "Bash(lando wp media import:*)",
+      "Bash(lando wp post list:*)",
+      "Bash(lando wp term list:*)"
+    ]
+  }
+}
